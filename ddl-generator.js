@@ -189,14 +189,14 @@ class DDLGenerator {
       // var nameSchema = nameSplit[0];
       // var nameSchema = nameSplit[1];
 
-      var drop = "IF (EXISTS (SELECT * ";
+      // var drop = "IF (EXISTS (SELECT * ";
       // drop += "FROM INFORMATION_SCHEMA.TABLES";
       // drop += "WHERE TABLE_SCHEMA = '" + nameSchema + "'";
       // drop += "AND TABLE_NAME = '" + nameTable + "'))";
       // drop += "BEGIN";
       // drop += 'DROP TABLE ' + this.getId(elem.name, options) + ';';
       // drop += "END;";
-      codeWriter.writeLine(drop);
+      codeWriter.writeLine("drop");
     }
   }
 
