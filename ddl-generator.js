@@ -185,7 +185,8 @@ class DDLGenerator {
       codeWriter.writeLine('DROP TABLE ' + this.getId(elem.name, options) + ' CASCADE CONSTRAINTS;')
     } else if (options.dbms === 'mssql') {
 
-      var nameSplit = this.getId(elem.name, options).replace("[", "").replace("]", "");
+      var nameSplit = this.getId(elem.name, options).split('.');
+      // var nameSplit = this.getId(elem.name, options).replace("[", "").replace("]", "");
       // var nameSchema = nameSplit[0];
       // var nameSchema = nameSplit[1];
 
@@ -196,7 +197,7 @@ class DDLGenerator {
       apagarTable += "BEGIN";
       apagarTable += 'DROP TABLE ' + this.getId(elem.name, options) + ';';
       apagarTable += "END;";
-      codeWriter.writeLine(apagarTable);
+      codeWriter.writeLine(apagarTable + nameSplit[0]);
     }
   }
 
