@@ -34,7 +34,8 @@
       "type": "dropdown",
       "options": [
         { "value": "mysql",  "text": "MySQL" },
-        { "value": "oracle", "text": "Oracle" }
+        { "value": "oracle", "text": "Oracle" },
+        { "value": "oracle", "text": "MSSQL" }
       ],
       "default": "mysql"
     },
