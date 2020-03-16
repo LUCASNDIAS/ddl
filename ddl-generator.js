@@ -184,7 +184,7 @@ class DDLGenerator {
     } else if (options.dbms === 'oracle') {
       codeWriter.writeLine('DROP TABLE ' + this.getId(elem.name, options) + ' CASCADE CONSTRAINTS;')
     } else if (options.dbms === 'mssql') {
-      codeWriter.writeLine('DROP TABLE ' + this.getId(elem.name, options) + ' CASCADE CONSTRAINTS;')
+      codeWriter.writeLine('DROP TABLE ' + this.getId(elem.name, options) + ';')
     }
   }
 
