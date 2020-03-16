@@ -196,7 +196,7 @@ class DDLGenerator {
       drop += "BEGIN";
       drop += 'DROP TABLE ' + this.getId(elem.name, options) + ';';
       drop += "END;";
-      codeWriter.writeLine(drop)
+      codeWriter.writeLine("drop")
     }
   }
 
