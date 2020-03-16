@@ -199,7 +199,7 @@ class DDLGenerator {
     var lines = []
     var primaryKeys = []
     var uniques = []
-    var fg = "[" + options + "]";
+    var fg = "[" + options.fg + "]";
     var wp = "WITH (" + options.wp + ") ON " + fg;
     var nomeTabela = self.getId(elem.name, options);
     var nomePk = "[PK_" + nomeTabela.replace('].[', '_').replace('[','');
