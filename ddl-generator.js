@@ -162,11 +162,18 @@ class DDLGenerator {
     })
     fks.forEach(function (fk) {
       if (fk.referenceTo) {
-        var line = 'ALTER TABLE '
-        line += self.getId(elem.name, options) + ' '
-        line += 'ADD FOREIGN KEY (' + self.getId(fk.name, options) + ') '
-        line += 'REFERENCES ' + self.getId(fk.referenceTo._parent.name, options)
-        line += '(' + self.getId(fk.referenceTo.name, options) + ');'
+        var nameCompleto = self.getId(elem.name, options).split('.');
+        var nameParent = self.getId(fk.referenceTo._parent.name, options).split('.');
+        var nameSchema = nameCompleto[0].replace('[','').replace(']','');
+        var nameTable = nameCompleto[1].replace('[','').replace(']','');
+        var nameTableParent = nameParent[1].replace('[','').replace(']','');
+        var nameFk = "[FK_" + nameSchema + "_" + nameTable + "_" + nameTableParent + "]";
+        var line = 'ALTER TABLE ';
+        line += self.getId(elem.name, options) + ' ';
+        line += 'WITH CHECK ADD CONSTRAINT ' + nameFk + ' ';
+        line += 'FOREIGN KEY ([' + self.getId(fk.name, options) + ']) ';
+        line += 'REFERENCES ' + self.getId(fk.referenceTo._parent.name, options);
+        line += '(' + self.getId(fk.referenceTo.name, options) + ');';
         codeWriter.writeLine(line)
       }
     })
@@ -290,11 +297,18 @@ class DDLGenerator {
         if (options.dbms === 'mysql') {
           codeWriter.writeLine('SET FOREIGN_KEY_CHECKS = 0;')
         }
+
+        
+        
+        // Estrutura condicional de bloqueio de drop
+        codeWriter.writeLine('DECLARE	@AUTH BIT SET @AUTH = 0 IF (@AUTH = 1) BEGIN')       
         elem.ownedElements.forEach(e => {
           if (e instanceof type.ERDEntity) {
             this.writeDropTable(codeWriter, e, options)
           }
         })
+        codeWriter.writeLine('END;')
+
         if (options.dbms === 'mysql') {
           codeWriter.writeLine('SET FOREIGN_KEY_CHECKS = 1;')
         }
