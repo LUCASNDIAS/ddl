@@ -192,7 +192,7 @@ class DDLGenerator {
       var apagarTable = "IF (EXISTS (SELECT * ";
       apagarTable += "FROM INFORMATION_SCHEMA.TABLES";
       // apagarTable += "WHERE TABLE_SCHEMA = '" + nameSchema + "'";
-      // apagarTable += "AND TABLE_NAME = '" + nameTable + "'))";
+      apagarTable += "AND TABLE_NAME = '" + nameSplit + "'))";
       apagarTable += "BEGIN";
       apagarTable += 'DROP TABLE ' + this.getId(elem.name, options) + ';';
       apagarTable += "END;";
