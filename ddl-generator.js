@@ -67,7 +67,7 @@ class DDLGenerator {
    */
   getId (id, options) {
     if (options.quoteIdentifiers) {
-      return '`' + id + '`'
+      return '[' + id + ']'
     }
     return id
   }
@@ -183,6 +183,8 @@ class DDLGenerator {
       codeWriter.writeLine('DROP TABLE IF EXISTS ' + this.getId(elem.name, options) + ';')
     } else if (options.dbms === 'oracle') {
       codeWriter.writeLine('DROP TABLE ' + this.getId(elem.name, options) + ' CASCADE CONSTRAINTS;')
+    } else if (options.dbms === 'mssql') {
+      codeWriter.writeLine('DROP TABLE ' + this.getId(elem.name, options) + ' CASCADE CONSTRAINTS;')
     }
   }
 
@@ -197,9 +199,15 @@ class DDLGenerator {
     var lines = []
     var primaryKeys = []
     var uniques = []
+    var fg = "[" + options.fg + "]";
+    var wp = "WITH (" + options.wp + ") ON " + fg;
+    var nomeTabela = self.getId(elem.name, options);
+    var nomePk = "[PK_" + nomeTabela.replace('].[', '_').replace('[','');
+    var constraint = "CONSTRAINT " + nomePk + "PRIMARY KEY CLUSTERED (";
+    
 
     // Table
-    codeWriter.writeLine('HALLS CREATE TABLE ' + self.getId(elem.name, options) + ' (')
+    codeWriter.writeLine('CREATE TABLE ' + self.getId(elem.name, options) + ' (')
     codeWriter.indent()
 
     // Columns
@@ -213,23 +221,34 @@ class DDLGenerator {
       lines.push(self.getColumnString(col, options))
     })
 
-    // Primary Keys
-    if (primaryKeys.length > 0) {
-      lines.push('PRIMARY KEY (' + primaryKeys.join(', ') + ')')
-    }
+    if (options.dbms !== 'mssql') {
+      // Primary Keys
+      if (primaryKeys.length > 0) {
+        lines.push('PRIMARY KEY (' + primaryKeys.join(', ') + ')')
+      }
 
-    // Uniques
-    if (uniques.length > 0) {
-      lines.push('UNIQUE (' + uniques.join(', ') + ')')
+      // Uniques
+      if (uniques.length > 0) {
+        lines.push('UNIQUE (' + uniques.join(', ') + ')')
+      }
+    } else {
+      if (primaryKeys.length > 0) {
+        constraint += primaryKeys.join(', ') + "ASC )";
+        constraint += wp;
+      }
     }
-
+  
     // Write lines
     for (var i = 0, len = lines.length; i < len; i++) {
       codeWriter.writeLine(lines[i] + (i < len - 1 ? ',' : ''))
     }
 
     codeWriter.outdent()
-    codeWriter.writeLine(');')
+    if (options.dbms !== 'mssql') {
+      codeWriter.writeLine(');')
+    } else {
+      codeWriter.writeLine(') ON ' + fg)
+    }
     codeWriter.writeLine()
   }
 
