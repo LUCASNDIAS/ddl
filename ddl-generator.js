@@ -199,7 +199,7 @@ class DDLGenerator {
     var uniques = []
 
     // Table
-    codeWriter.writeLine('CREATE TABLE ' + self.getId(elem.name, options) + ' (')
+    codeWriter.writeLine('HALLS CREATE TABLE ' + self.getId(elem.name, options) + ' (')
     codeWriter.indent()
 
     // Columns
