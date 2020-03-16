@@ -34,7 +34,7 @@ class DDLGenerator {
    * @param {type.ERDDataModel} baseModel
    * @param {string} basePath generated files and directories to be placed
    */
-  constructor (baseModel, basePath) {
+  constructor(baseModel, basePath) {
     /** @member {type.Model} */
     this.baseModel = baseModel
 
@@ -47,7 +47,7 @@ class DDLGenerator {
    * @param {Object} options
    * @return {string}
    */
-  getIndentString (options) {
+  getIndentString(options) {
     if (options.useTab) {
       return '\t'
     } else {
@@ -65,7 +65,7 @@ class DDLGenerator {
    * @param {String} id
    * @param {Object} options
    */
-  getId (id, options) {
+  getId(id, options) {
     if (options.quoteIdentifiers) {
       return '[' + id + ']'
     }
@@ -77,7 +77,7 @@ class DDLGenerator {
    * @param {type.ERDEntity} elem
    * @return {Array.<ERDColumn>}
    */
-  getPrimaryKeys (elem) {
+  getPrimaryKeys(elem) {
     var keys = []
     elem.columns.forEach(function (col) {
       if (col.primaryKey) {
@@ -92,7 +92,7 @@ class DDLGenerator {
    * @param {type.ERDEntity} elem
    * @return {Array.<ERDColumn>}
    */
-  getForeignKeys (elem) {
+  getForeignKeys(elem) {
     var keys = []
     elem.columns.forEach(function (col) {
       if (col.foreignKey) {
@@ -108,7 +108,7 @@ class DDLGenerator {
    * @param {Object} options
    * @return {String}
    */
-  getColumnString (elem, options) {
+  getColumnString(elem, options) {
     var self = this
     var line = self.getId(elem.name, options)
     var _type = elem.getTypeString()
@@ -128,7 +128,7 @@ class DDLGenerator {
    * @param {type.ERDEntity} elem
    * @param {Object} options
    */
-  writeForeignKeys (codeWriter, elem, options) {
+  writeForeignKeys(codeWriter, elem, options) {
     var self = this
     var fks = self.getForeignKeys(elem)
     var ends = elem.getRelationshipEnds(true)
@@ -178,13 +178,25 @@ class DDLGenerator {
    * @param {type.ERDEntity} elem
    * @param {Object} options
    */
-  writeDropTable (codeWriter, elem, options) {
+  writeDropTable(codeWriter, elem, options) {
     if (options.dbms === 'mysql') {
       codeWriter.writeLine('DROP TABLE IF EXISTS ' + this.getId(elem.name, options) + ';')
     } else if (options.dbms === 'oracle') {
       codeWriter.writeLine('DROP TABLE ' + this.getId(elem.name, options) + ' CASCADE CONSTRAINTS;')
     } else if (options.dbms === 'mssql') {
-      codeWriter.writeLine('DROP TABLE ' + this.getId(elem.name, options) + ';')
+
+      var nameSplit = this.getId(elem.name, options).split('.').replace('[', '').replace(']', '');
+      var nameSchema = nameSplit[0];
+      var nameTable = nameSplit[1];
+
+      var drop = "IF (EXISTS (SELECT * ";
+      drop += "FROM INFORMATION_SCHEMA.TABLES";
+      drop += "WHERE TABLE_SCHEMA = '" + nameSchema + "'";
+      drop += "AND TABLE_NAME = '" + nameTable + "'))";
+      drop += "BEGIN";
+      drop += 'DROP TABLE ' + this.getId(elem.name, options) + ';';
+      drop += "END;";
+      codeWriter.writeLine(drop)
     }
   }
 
@@ -194,7 +206,7 @@ class DDLGenerator {
    * @param {type.ERDEntity} elem
    * @param {Object} options
    */
-  writeTable (codeWriter, elem, options) {
+  writeTable(codeWriter, elem, options) {
     var self = this
     var lines = []
     var primaryKeys = []
@@ -202,9 +214,9 @@ class DDLGenerator {
     var fg = "[" + options.fg + "]";
     var wp = "WITH (" + options.wp + ") ON " + fg;
     var nomeTabela = self.getId(elem.name, options);
-    var nomePk = "[PK_" + nomeTabela.replace('].[', '_').replace('[','');
+    var nomePk = "[PK_" + nomeTabela.replace('].[', '_').replace('[', '');
     var constraintPk = "CONSTRAINT " + nomePk + " PRIMARY KEY CLUSTERED (";
-    
+
     // Table
     codeWriter.writeLine('CREATE TABLE ' + self.getId(elem.name, options) + ' (')
     codeWriter.indent()
@@ -243,7 +255,7 @@ class DDLGenerator {
         lines.push('UNIQUE (' + uniques.join(', ') + ')')
       }
     }
-  
+
     // Write lines
     for (var i = 0, len = lines.length; i < len; i++) {
       codeWriter.writeLine(lines[i] + (i < len - 1 ? ',' : ''))
@@ -265,7 +277,7 @@ class DDLGenerator {
    * @param {Object} options
    * @return {$.Promise}
    */
-  generate (elem, basePath, options) {
+  generate(elem, basePath, options) {
     var codeWriter
 
     // DataModel
@@ -314,7 +326,7 @@ class DDLGenerator {
  * @param {string} basePath
  * @param {Object} options
  */
-function generate (baseModel, basePath, options) {
+function generate(baseModel, basePath, options) {
   var generator = new DDLGenerator(baseModel, basePath)
   return generator.generate(baseModel, basePath, options)
 }
