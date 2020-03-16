@@ -185,14 +185,14 @@ class DDLGenerator {
       codeWriter.writeLine('DROP TABLE ' + this.getId(elem.name, options) + ' CASCADE CONSTRAINTS;')
     } else if (options.dbms === 'mssql') {
 
-      var nameSplit = this.getId(elem.name, options).replace("[", "").replace("]", "").split('.');
-      var nameSchema = nameSplit[0];
-      var nameSchema = nameSplit[1];
+      var nameSplit = this.getId(elem.name, options).replace("[", "").replace("]", "");
+      // var nameSchema = nameSplit[0];
+      // var nameSchema = nameSplit[1];
 
       var apagarTable = "IF (EXISTS (SELECT * ";
       apagarTable += "FROM INFORMATION_SCHEMA.TABLES";
-      apagarTable += "WHERE TABLE_SCHEMA = '" + nameSchema + "'";
-      apagarTable += "AND TABLE_NAME = '" + nameTable + "'))";
+      // apagarTable += "WHERE TABLE_SCHEMA = '" + nameSchema + "'";
+      // apagarTable += "AND TABLE_NAME = '" + nameTable + "'))";
       apagarTable += "BEGIN";
       apagarTable += 'DROP TABLE ' + this.getId(elem.name, options) + ';';
       apagarTable += "END;";
