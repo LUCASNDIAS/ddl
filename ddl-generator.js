@@ -191,11 +191,11 @@ class DDLGenerator {
       var nameTable = nameSplit[1].replace("[", "").replace("]", "");
 
       var apagarTable = "IF (EXISTS (SELECT * ";
-      apagarTable += "FROM INFORMATION_SCHEMA.TABLES";
-      apagarTable += "WHERE TABLE_SCHEMA = '" + nameSchema + "'";
-      apagarTable += "AND TABLE_NAME = '" + nameTable + "'))";
-      apagarTable += "BEGIN";
-      apagarTable += 'DROP TABLE ' + this.getId(elem.name, options) + ';';
+      apagarTable += "FROM INFORMATION_SCHEMA.TABLES ";
+      apagarTable += "WHERE TABLE_SCHEMA = '" + nameSchema + "' ";
+      apagarTable += "AND TABLE_NAME = '" + nameTable + "')) ";
+      apagarTable += "BEGIN ";
+      apagarTable += 'DROP TABLE ' + this.getId(elem.name, options) + '; ';
       apagarTable += "END;";
       codeWriter.writeLine(apagarTable);
     }
