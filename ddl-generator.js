@@ -199,11 +199,11 @@ class DDLGenerator {
     var lines = []
     var primaryKeys = []
     var uniques = []
-    var fg = "[" + options.fg + "]";
+    var fg = "[" + options + "]";
     var wp = "WITH (" + options.wp + ") ON " + fg;
     var nomeTabela = self.getId(elem.name, options);
     var nomePk = "[PK_" + nomeTabela.replace('].[', '_').replace('[','');
-    var constraintPk = "CONSTRAINT " + nomePk + "PRIMARY KEY CLUSTERED (";
+    var constraintPk = "CONSTRAINT " + nomePk + " PRIMARY KEY CLUSTERED (";
     
     // Table
     codeWriter.writeLine('CREATE TABLE ' + self.getId(elem.name, options) + ' (')
@@ -233,7 +233,7 @@ class DDLGenerator {
 
     } else {
       if (primaryKeys.length > 0) {
-        constraintPk += primaryKeys.join(', ') + "ASC )";
+        constraintPk += primaryKeys.join(', ') + " ASC )";
         constraintPk += wp;
         lines.push(constraintPk);
       }
