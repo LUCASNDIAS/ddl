@@ -164,9 +164,9 @@ class DDLGenerator {
       if (fk.referenceTo) {
         var nameCompleto = self.getId(elem.name, options).split('.');
         var nameParent = self.getId(fk.referenceTo._parent.name, options).split('.');
-        var nameSchema = nameCompleto[0].replace('[','').replace(']','');
-        var nameTable = nameCompleto[1].replace('[','').replace(']','');
-        var nameTableParent = nameParent[1].replace('[','').replace(']','');
+        var nameSchema = nameCompleto[0].replace('[', '').replace(']', '');
+        var nameTable = nameCompleto[1].replace('[', '').replace(']', '');
+        var nameTableParent = nameParent[1].replace('[', '').replace(']', '');
         var nameFk = "[FK_" + nameSchema + "_" + nameTable + "_" + nameTableParent + "]";
         var line = 'ALTER TABLE ';
         line += self.getId(elem.name, options) + ' ';
@@ -287,7 +287,8 @@ class DDLGenerator {
    */
   generate(elem, basePath, options) {
     var codeWriter
-
+    var schemaArray = []
+    var nameSplit = []
     // DataModel
     if (elem instanceof type.ERDDataModel) {
       codeWriter = new codegen.CodeWriter(this.getIndentString(options))
@@ -297,14 +298,50 @@ class DDLGenerator {
         if (options.dbms === 'mysql') {
           codeWriter.writeLine('SET FOREIGN_KEY_CHECKS = 0;')
         }
+        //Estrutura de schemas
+        elem.ownedElements.forEach(e => {
+          if (e instanceof type.ERDEntity) {
+            nameSplit = this.getId(e.name, options).split('.');
+            var nameSchemaDrop = nameSplit[0].replace("[", "").replace("]", "");
+            if (schemaArray.indexOf(nameSchemaDrop) < 0)
+            {
+              schemaArray.push(nameSchemaDrop);
+            }
 
-        
-        
+          }
+        })
+
         // Estrutura condicional de bloqueio de drop
-        codeWriter.writeLine('DECLARE	@AUTH BIT SET @AUTH = 0 IF (@AUTH = 1) BEGIN')       
+        codeWriter.writeLine('DECLARE	@AUTH BIT SET @AUTH = 0 IF (@AUTH = 1) BEGIN')
+        codeWriter.writeLine();
+        codeWriter.writeLine();
+
+        codeWriter.writeLine("--DECLARE @sql NVARCHAR(MAX) = N''");
+        codeWriter.writeLine("--SELECT @sql += N'");
+        codeWriter.writeLine("--ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(FK.parent_object_id))");
+        codeWriter.writeLine("--    + '.' + QUOTENAME(OBJECT_NAME(FK.parent_object_id)) + ");
+        codeWriter.writeLine("--    ' DROP CONSTRAINT ' + QUOTENAME(FK.name) + ';'")
+        codeWriter.writeLine("--FROM sys.foreign_keys FK");
+        codeWriter.writeLine("--INNER JOIN sys.schemas S ON FK.schema_id = S.schema_id");
+        codeWriter.writeLine("--WHERE");
+
+        schemaArray.forEach(function (valor, index) {
+          if(index == 0){
+            codeWriter.writeLine("--S.name = '" + valor + "'");
+          }else{
+            codeWriter.writeLine("--OR S.name = '" + valor + "'");
+          }
+        });
+        codeWriter.writeLine("--PRINT @sql;");
+        codeWriter.writeLine("--EXEC sp_executesql @sql;");
+
+        codeWriter.writeLine();
+        codeWriter.writeLine();
+        
         elem.ownedElements.forEach(e => {
           if (e instanceof type.ERDEntity) {
             this.writeDropTable(codeWriter, e, options)
+            codeWriter.writeLine();
           }
         })
         codeWriter.writeLine('END;')
