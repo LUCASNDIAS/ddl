@@ -250,6 +250,7 @@ class DDLGenerator {
       if (uniques.length > 0) {
         lines.push('UNIQUE (' + uniques.join(', ') + ')')
       }
+      
 
     } else {
       if (primaryKeys.length > 0) {
